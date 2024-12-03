@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Museum Cybersecurity Training Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(to bottom right, #1f1f1f, #3a3a3a);
+      color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: #121212;
+      border-radius: 15px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      text-align: center;
+      box-sizing: border-box;
+    }
+    .question {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      color: #ffffff;
+    }
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .choices button {
+      background-color: #007aff;
+      border: none;
+      border-radius: 8px;
+      color: #ffffff;
+      padding: 15px 10px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .choices button:hover {
+      background-color: #0056ff;
+      transform: translateY(-3px);
+    }
+    .progress-bar {
+      height: 10px;
+      background: #007aff;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .feedback {
+      font-size: 1.2em;
+      margin-top: 10px;
+    }
+    .score {
+      margin-top: 20px;
+      font-size: 1.3em;
+      color: #ffa500;
+    }
+    .resources {
+      margin-top: 30px;
+      text-align: left;
+    }
+    .resources h3 {
+      font-size: 1.3em;
+      margin-bottom: 10px;
+    }
+    .resources a {
+      color: #007aff;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 5px;
+      font-size: 1em;
+    }
+    .resources a:hover {
+      text-decoration: underline;
+    }
+    .progress-indicator {
+      margin-bottom: 10px;
+      font-size: 1.1em;
+      color: #cccccc;
+    }
+    #restartButton {
+      display: none;
+      background-color: #ff4500;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    #restartButton:hover {
+      background-color: #d14000;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .choices {
+        grid-template-columns: 1fr; /* Stack buttons in one column */
+      }
+      .question {
+        font-size: 1.3em;
+      }
+      .choices button {
+        font-size: 1em;
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px;
+      }
+      .question {
+        font-size: 1.2em;
+      }
+      .choices button {
+        font-size: 0.9em;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title"><h2>Museum Cybersecurity Training Game</h2></div>
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="progress-indicator" id="progressIndicator"></div>
+    <div class="question" id="question"></div>
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="score" id="score"></div>
+    <button id="restartButton" onclick="restartGame()">Restart Game</button>
+    <div class="resources" id="resources" style="display: none;">
+      <h3>Continue Learning:</h3>
+      <a href="https://www.cybersecurityandinfosec.com" target="_blank">Cybersecurity Basics</a>
+      <a href="https://staysafeonline.org" target="_blank">Stay Safe Online</a>
+      <a href="https://www.sans.org" target="_blank">SANS Cybersecurity Resources</a>
+      <a href="https://cisa.gov" target="_blank">CISA Resources</a>
+    </div>
+  </div>
+
+  <script>
+   const questions = [
+      {
+        question: "An email claims to be from a major donor asking for sensitive information about an exhibit. What should you do?",
+        options: [
+          "Respond immediately with the requested information",
+          "Verify the email's legitimacy by contacting the donor through official channels",
+          "Forward it to your colleagues for review",
+          "Ignore it"
+        ],
+        answer: "Verify the email's legitimacy by contacting the donor through official channels",
+        explanation: "Phishing emails often impersonate high-profile individuals. Always verify requests through trusted channels."
+      },
+      {
+        question: "What should you do if you receive an alert about a ransomware attack on the museum's network?",
+        options: [
+          "Turn off your computer",
+          "Disconnect from the network and notify IT immediately",
+          "Try to delete the ransomware",
+          "Ignore the alert and keep working"
+        ],
+        answer: "Disconnect from the network and notify IT immediately",
+        explanation: "Disconnecting limits the ransomware's spread, and IT can begin remediation promptly."
+      },
+      {
+        question: "You find a USB drive labeled 'Exhibit Photos' in the museum lobby. What should you do?",
+        options: [
+          "Plug it in to check the contents",
+          "Hand it over to the IT department",
+          "Keep it for personal use",
+          "Throw it away"
+        ],
+        answer: "Hand it over to the IT department",
+        explanation: "USB drives can contain malware. IT can analyze it safely without risking the network."
+      },
+      {
+        question: "What is the best practice for securing sensitive donor information?",
+        options: [
+          "Store it in a password-protected spreadsheet",
+          "Encrypt the data and limit access to authorized personnel",
+          "Keep it in a shared Google Drive folder",
+          "Print it and store it in a filing cabinet"
+        ],
+        answer: "Encrypt the data and limit access to authorized personnel",
+        explanation: "Encryption and access control ensure sensitive information remains secure and protected."
+      },
+      {
+        question: "What should you do if you notice unauthorized changes to exhibit content on the museum's website?",
+        options: [
+          "Log in and restore the content yourself",
+          "Report it to IT immediately",
+          "Notify the marketing team",
+          "Ignore it"
+        ],
+        answer: "Report it to IT immediately",
+        explanation: "Unauthorized changes may indicate a website breach. IT can investigate and secure the site."
+      },
+      {
+        question: "Which of the following is a sign of a phishing email?",
+        options: [
+          "Generic greetings like 'Dear Employee'",
+          "Misspellings and grammatical errors",
+          "Urgent requests for sensitive information",
+          "All of the above"
+        ],
+        answer: "All of the above",
+        explanation: "Phishing emails often contain these signs. Stay cautious and report suspicious emails."
+      },
+      {
+        question: "What is the purpose of multi-factor authentication (MFA)?",
+        options: [
+          "To add an extra layer of security to logins",
+          "To simplify password management",
+          "To speed up logins",
+          "To allow guest access"
+        ],
+        answer: "To add an extra layer of security to logins",
+        explanation: "MFA ensures only authorized users can access accounts by requiring additional verification steps."
+      },
+      {
+        question: "Why should you avoid using public Wi-Fi to access museum systems?",
+        options: [
+          "Public Wi-Fi is too slow",
+          "Public Wi-Fi is insecure and can expose sensitive data",
+          "It violates museum policy",
+          "It reduces battery life"
+        ],
+        answer: "Public Wi-Fi is insecure and can expose sensitive data",
+        explanation: "Public Wi-Fi networks are not secure, making them vulnerable to attacks like man-in-the-middle (MITM)."
+      },
+      {
+        question: "How should you respond if a colleague asks for your login credentials?",
+        options: [
+          "Share your credentials to help them out",
+          "Notify IT about the request",
+          "Politely decline and offer to assist without sharing",
+          "Ignore the request"
+        ],
+        answer: "Politely decline and offer to assist without sharing",
+        explanation: "Never share your login credentials. It violates security policies and compromises accountability."
+      },
+      {
+        question: "Why is it important to lock your computer when leaving your desk?",
+        options: [
+          "To save energy",
+          "To prevent unauthorized access to sensitive systems",
+          "To stop malware attacks",
+          "To update the software"
+        ],
+        answer: "To prevent unauthorized access to sensitive systems",
+        explanation: "Locking your computer ensures only authorized users can access sensitive information."
+      },
+      {
+        question: "What should you do if you accidentally click on a suspicious link in an email?",
+        options: [
+          "Close the email and move on",
+          "Disconnect from the network and inform IT",
+          "Delete the email",
+          "Restart your computer"
+        ],
+        answer: "Disconnect from the network and inform IT",
+        explanation: "Quickly notifying IT allows them to mitigate potential risks and secure the network."
+      },
+      {
+        question: "What is the purpose of a cybersecurity incident response plan?",
+        options: [
+          "To provide step-by-step instructions for responding to security breaches",
+          "To eliminate the need for regular security updates",
+          "To allow unrestricted access during emergencies",
+          "To reduce the workload of the IT team"
+        ],
+        answer: "To provide step-by-step instructions for responding to security breaches",
+        explanation: "Incident response plans ensure a coordinated and effective response to security incidents."
+      },
+      {
+        question: "What should you do if you receive an email with a suspicious attachment?",
+        options: [
+          "Download and open the attachment to see what it is",
+          "Forward it to a colleague",
+          "Report the email to IT without opening the attachment",
+          "Ignore the email"
+        ],
+        answer: "Report the email to IT without opening the attachment",
+        explanation: "Suspicious attachments can contain malware. IT can investigate safely."
+      },
+      {
+        question: "What is the best way to manage passwords for multiple systems?",
+        options: [
+          "Use a password manager",
+          "Write them down on paper",
+          "Use the same password for all systems",
+          "Rely on browser auto-fill"
+        ],
+        answer: "Use a password manager",
+        explanation: "Password managers securely store and generate strong passwords for multiple accounts."
+      },
+      {
+        question: "What is the first step to take if you suspect a cyberattack on the museum's network?",
+        options: [
+          "Report the incident to IT immediately",
+          "Turn off your computer",
+          "Try to fix the problem yourself",
+          "Ignore it and keep working"
+        ],
+        answer: "Report the incident to IT immediately",
+        explanation: "Timely reporting allows IT to assess the situation and take necessary action to prevent damage."
+      }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+
+    const questionElement = document.getElementById('question');
+    const choicesElement = document.getElementById('choices');
+    const feedbackElement = document.getElementById('feedback');
+    const scoreElement = document.getElementById('score');
+    const progressBar = document.getElementById('progressBar');
+    const progressIndicator = document.getElementById('progressIndicator');
+    const resourcesElement = document.getElementById('resources');
+    const restartButton = document.getElementById('restartButton');
+
+    function loadQuestion() {
+      const currentQuestion = shuffledQuestions[currentQuestionIndex];
+      questionElement.textContent = currentQuestion.question;
+      choicesElement.innerHTML = '';
+      feedbackElement.textContent = '';
+      progressIndicator.textContent = `Question ${currentQuestionIndex + 1} of ${shuffledQuestions.length}`;
+      progressBar.style.width = `${((currentQuestionIndex + 1) / shuffledQuestions.length) * 100}%`;
+
+      currentQuestion.options.forEach(option => {
+        const button = document.createElement('button');
+        button.textContent = option;
+        button.addEventListener('click', () => checkAnswer(option));
+        choicesElement.appendChild(button);
+      });
+    }
+
+    function checkAnswer(selectedOption) {
+      const currentQuestion = shuffledQuestions[currentQuestionIndex];
+      if (selectedOption === currentQuestion.answer) {
+        score++;
+        feedbackElement.textContent = `Correct! ${currentQuestion.explanation}`;
+        feedbackElement.style.color = 'green';
+      } else {
+        feedbackElement.textContent = `Incorrect. ${currentQuestion.explanation}`;
+        feedbackElement.style.color = 'red';
+      }
+
+      currentQuestionIndex++;
+      if (currentQuestionIndex < shuffledQuestions.length) {
+        setTimeout(loadQuestion, 2000);
+      } else {
+        endGame();
+      }
+      scoreElement.textContent = `Score: ${score} / ${shuffledQuestions.length}`;
+    }
+
+    function endGame() {
+  questionElement.textContent = "Game Over!";
+  choicesElement.innerHTML = '';
+
+  // Define quotes based on grades
+  const quotes = {
+    A: [
+      "“Museums are where the world makes sense.” – Orhan Pamuk",
+      "“Museums are storytellers of history and culture.”",
+      "“A museum is a place to lose yourself and find the world.”"
+    ],
+    B: [
+      "“Art washes away from the soul the dust of everyday life.” – Pablo Picasso",
+      "“Museums hold the treasures of our imagination.”",
+      "“To visit a museum is to enrich your soul.”"
+    ],
+    C: [
+      "“Every museum creates its own story.”",
+      "“Visiting a museum is like reading a history book with your eyes.”",
+      "“Learning never stops, even in museums.”"
+    ],
+    D: [
+      "“Mistakes are proof you’re learning.”",
+      "“Museums inspire curiosity, even when we stumble.”",
+      "“Every visit to a museum is a step toward understanding.”"
+    ],
+    F: [
+      "“The best way to predict the future is to create it.”",
+      "“Every expert was once a beginner.”",
+      "“Mistakes pave the way for mastery.”"
+    ]
+  };
+
+  // Determine grade and emoji
+  let grade = '';
+  let emoji = '';
+  if (score / shuffledQuestions.length >= 0.9) {
+    grade = "A";
+    emoji = "🎉🏆";
+  } else if (score / shuffledQuestions.length >= 0.8) {
+    grade = "B";
+    emoji = "👏";
+  } else if (score / shuffledQuestions.length >= 0.7) {
+    grade = "C";
+    emoji = "👍";
+  } else if (score / shuffledQuestions.length >= 0.6) {
+    grade = "D";
+    emoji = "💪";
+  } else {
+    grade = "F";
+    emoji = "😞";
+  }
+
+  // Select a random quote based on grade
+  const randomQuote = quotes[grade][Math.floor(Math.random() * quotes[grade].length)];
+
+  // Display final feedback with grade and quote
+  feedbackElement.innerHTML = `
+    Your final score is ${score} out of ${shuffledQuestions.length}. Grade: ${grade} ${emoji}<br>
+    <em>${randomQuote}</em>
+  `;
+  feedbackElement.style.color = "#ffa500";
+
+  // Show additional resources and restart button
+  resourcesElement.style.display = 'block';
+  progressBar.style.width = '100%';
+  restartButton.style.display = 'block';
+}
+
+
+    function restartGame() {
+      currentQuestionIndex = 0;
+      score = 0;
+      resourcesElement.style.display = 'none';
+      restartButton.style.display = 'none';
+      loadQuestion();
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
